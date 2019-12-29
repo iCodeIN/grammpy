@@ -34,6 +34,7 @@ setup(
         'grammpy.transforms.SplittedRules',
         'grammpy.transforms.UnitRulesRemove',
         'grammpy.transforms.UnreachableSymbolsRemove',
+        'grammpy.transforms.LLTable',
     ],
     url='https://github.com/PatrikValkovic/grammpy',
     download_url='https://github.com/PatrikValkovic/grammpy/archive/v' + v + '.tar.gz',

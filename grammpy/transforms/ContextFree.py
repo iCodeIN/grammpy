@@ -14,6 +14,7 @@ from .EpsilonRulesRemove import *
 from .NongeneratingSymbolsRemove import *
 from .UnitRulesRemove import *
 from .UnreachableSymbolsRemove import *
+from .LLTable import *
 
 if TYPE_CHECKING:  # pragma: no cover
     from .. import Grammar
@@ -170,3 +171,8 @@ class ContextFree:
         grammar = ContextFree.remove_useless_symbols(grammar, True)
         grammar = ContextFree.transform_to_chomsky_normal_form(grammar, True)
         return grammar
+
+    @staticmethod
+    def create_ll_table(grammar: Grammar, distance: int = 1):
+        # TODO doc comment
+        return create_ll_table(grammar, distance)
