@@ -93,14 +93,15 @@ def create_ll_table(grammar, distance=1):
     something_changed = True
     while something_changed:
         something_changed = False
-        for r in grammar.rules:
-            l = r.fromSymbol  # type: Type[Nonterminal]
-            r = r.right  # type: list
-            new_s = dict.setdefault(first, l, set())
+        for rule in grammar.rules:
+            l = rule.fromSymbol  # type: Type[Nonterminal]
+            r = rule.right  # type: list
+            new_s = dict.setdefault(first, l, set()).copy()
             for r_part in r:
                 r_set = None
                 if r_part == EPSILON:
                     new_s.add(EPSILON)
+                    r_set = [EPSILON]
                     break
                 if not Nonterminal.is_nonterminal(r_part):
                     new_s.add(r_part)
@@ -112,7 +113,7 @@ def create_ll_table(grammar, distance=1):
                 new_s.remove(EPSILON)
             if r_set is not None and EPSILON in r_set:
                 new_s.add(EPSILON)
-            something_changed = something_changed or new_s != dict.setdefault(first, l, set())
+            something_changed = something_changed or new_s != first[l]
             first[l] = new_s
     # fill terminals to first
     for t in grammar.terminals:
