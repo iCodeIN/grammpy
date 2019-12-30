@@ -6,7 +6,6 @@
 Part of grammpy
 
 """
-from inspect import isclass
 from typing import Type, TYPE_CHECKING
 
 from ... import Nonterminal
@@ -23,5 +22,4 @@ def _is_unit(rule):
     :return: True if is parameter unit rule, false otherwise.
     """
     return len(rule.left) == 1 and len(rule.right) == 1 and \
-           isclass(rule.fromSymbol) and isclass(rule.toSymbol) and \
-           issubclass(rule.fromSymbol, Nonterminal) and issubclass(rule.toSymbol, Nonterminal)
+           Nonterminal.is_nonterminal(rule.fromSymbol) and Nonterminal.is_nonterminal(rule.toSymbol)

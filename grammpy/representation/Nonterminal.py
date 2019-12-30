@@ -7,6 +7,7 @@ Part of grammpy
 
 """
 
+from inspect import isclass
 from .support._RuleConnectable import _RuleConnectable
 
 
@@ -14,4 +15,8 @@ class Nonterminal(_RuleConnectable):
     '''
     Base class that represents nonterminals.
     '''
-    pass
+
+    @staticmethod
+    def is_nonterminal(var):
+        # TODO comments
+        return isclass(var) and issubclass(var, Nonterminal)

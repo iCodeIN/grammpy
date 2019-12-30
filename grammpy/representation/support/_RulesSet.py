@@ -6,9 +6,7 @@
 Part of grammpy
 
 """
-import inspect
 from typing import Iterable, List, TYPE_CHECKING, Type, Generator, Optional
-
 from deprecated import deprecated
 
 from .SplitRule import SplitRule
@@ -46,7 +44,7 @@ class _RulesSet(_BaseSet):
         :param rule: Rule to validate.
         :raise NotRuleException: If the parameter doesn't inherit from Rule.
         """
-        if not inspect.isclass(rule) or not issubclass(rule, Rule):
+        if not Rule.is_rule(rule):
             raise NotRuleException(rule)
         rule.validate(self._grammar)
 
@@ -169,7 +167,7 @@ class _RulesSet(_BaseSet):
         :raise RuleException: If the syntax of the rule is invalid.
         """
         for rule in rules:
-            if not inspect.isclass(rule) or not issubclass(rule, Rule):
+            if not Rule.is_rule(rule):
                 raise NotRuleException(rule)
             for r in self._split_rules(rule):
                 yield self._find_rule(r)

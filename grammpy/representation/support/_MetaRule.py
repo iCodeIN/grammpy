@@ -210,7 +210,7 @@ class _MetaRule(type):
         if EPS in side and len(side) > 1:
             raise UselessEpsilonException(cls)
         for symb in side:
-            if isclass(symb) and issubclass(symb, Nonterminal):
+            if Nonterminal.is_nonterminal(symb):
                 if symb not in grammar.nonterminals:
                     raise NonterminalDoesNotExistsException(cls, symb, grammar)
             elif symb is EPS:

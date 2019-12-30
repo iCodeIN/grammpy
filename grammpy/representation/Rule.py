@@ -8,6 +8,7 @@ Part of grammpy
 """
 
 from typing import Any, List, TYPE_CHECKING
+from inspect import isclass
 
 from .support._MetaRule import _MetaRule
 from .support._WeakList import _WeakList
@@ -70,3 +71,7 @@ class Rule(metaclass=_MetaRule):
         :return: List of symbols.
         """
         return self._to_symbols
+
+    @staticmethod
+    def is_rule(var):
+        return isclass(var) and issubclass(var, Rule)

@@ -6,7 +6,6 @@
 Part of grammpy
 
 """
-import inspect
 from typing import Iterable, TYPE_CHECKING, Type
 
 from ._BaseSet import _BaseSet
@@ -43,7 +42,7 @@ class _NonterminalSet(_BaseSet):
         :param nonterm: Nonterminal to check.
         :raise NotNonterminalException: If the object doesn't inherit from Nonterminal class.
         """
-        if not inspect.isclass(nonterm) or not issubclass(nonterm, Nonterminal):
+        if not Nonterminal.is_nonterminal(nonterm):
             raise NotNonterminalException(nonterm)
 
     def add(self, *nonterminals):
