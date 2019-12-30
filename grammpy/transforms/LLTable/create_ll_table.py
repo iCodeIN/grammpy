@@ -8,10 +8,10 @@ Part of grammpy
 """
 
 from typing import TYPE_CHECKING, Type, Iterable, Union
-from ...exceptions import NoRuleForViewException
+from ...exceptions import NoRuleForViewException, DuplicateEntryException
 
 if TYPE_CHECKING:
-    from grammpy import *
+    from grammpy import *  # pragma: no cover
 
 
 # TODO COMMENTS, Type hinting
@@ -24,6 +24,7 @@ class _LLTableQuery:
         self._at_stack = at_stack  # type: Type[Nonterminal]
 
     def __getitem__(self, see):
+        see = see if isinstance(see, Iterable) else [see]
         return self._table[tuple([self._at_stack] + list(see))]
 
     def see(self, *see):
@@ -41,11 +42,14 @@ class _LLTable:
 
     def add(self, at_stack, see, rule):
         # type: (Type[Nonterminal], Iterable[Union[Type[Nonterminal], Terminal]], Type[Rule]) -> _LLTable
-        see = tuple(see)
+        see = tuple(see if isinstance(see, Iterable) else [see])
         self._distance = max(self.distance, len(see))
         at_stack_dict = dict.setdefault(self._map, hash(at_stack), dict())
-        at_stack_dict[hash(see)] = rule
-        pass
+        see_h = hash(see)
+        if see_h in at_stack_dict and at_stack_dict[see_h] != rule:
+            raise DuplicateEntryException(at_stack, see, rule, at_stack_dict[see_h], self)
+        at_stack_dict[see_h] = rule
+        return self
 
     def __getitem__(self, keys):
         at_stack = keys[0]

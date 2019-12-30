@@ -25,3 +25,4 @@ from .TreeDeletedException import TreeDeletedException
 from .UselessEpsilonException import UselessEpsilonException
 from .LLException import LLException
 from .NoRuleForViewException import NoRuleForViewException
+from .DuplicateEntryException import DuplicateEntryException
