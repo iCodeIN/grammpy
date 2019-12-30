@@ -8,10 +8,12 @@ Part of grammpy
 """
 
 from typing import TYPE_CHECKING, Type, Iterable, Union
-from ...exceptions import NoRuleForViewException, DuplicateEntryException
 
 if TYPE_CHECKING:
     from grammpy import *  # pragma: no cover
+
+from ...exceptions import NoRuleForViewException, DuplicateEntryException
+from ...representation import EPSILON, Nonterminal
 
 
 # TODO COMMENTS, Type hinting
@@ -68,7 +70,79 @@ class _LLTable:
         return _LLTableQuery(self, at_stack)
 
 
+def _first_over_sequence(sequence, first):
+    f = set()
+    symb_f = [EPSILON]
+    for symb in sequence:
+        symb_f = dict.setdefault(first, symb, set())
+        if symb == EPSILON:
+            symb_f.add(EPSILON)
+        f = f.union(symb_f - {EPSILON})
+        if EPSILON not in symb_f:
+            return f
+    if EPSILON in symb_f:
+        f.add(EPSILON)
+    return f
+
+
 def create_ll_table(grammar, distance=1):
     # type: (Grammar, int) -> _LLTable
     # TODO doc comment
-    pass
+    # Compute first set
+    first = dict()
+    something_changed = True
+    while something_changed:
+        something_changed = False
+        for r in grammar.rules:
+            l = r.fromSymbol  # type: Type[Nonterminal]
+            r = r.right  # type: list
+            new_s = dict.setdefault(first, l, set())
+            for r_part in r:
+                r_set = None
+                if r_part == EPSILON:
+                    new_s.add(EPSILON)
+                    break
+                if not Nonterminal.is_nonterminal(r_part):
+                    new_s.add(r_part)
+                    break
+                r_set = dict.setdefault(first, r_part, set())
+                new_s = new_s.union(r_set)
+                if EPSILON not in r_set:
+                    break
+                new_s.remove(EPSILON)
+            if r_set is not None and EPSILON in r_set:
+                new_s.add(EPSILON)
+            something_changed = something_changed or new_s != dict.setdefault(first, l, set())
+            first[l] = new_s
+    # fill terminals to first
+    for t in grammar.terminals:
+        first[t] = {t}
+    # compute follow set
+    follow = dict()
+    follow[grammar.start] = {EPSILON}
+    something_changed = True
+    while something_changed:
+        something_changed = False
+        for rule in grammar.rules:
+            l = rule.fromSymbol  # type: Type[Nonterminal]
+            r = rule.right  # type: list
+            # part 1
+            for symb, index in zip(r, range(len(r))):
+                if not Nonterminal.is_nonterminal(symb):
+                    continue
+                right_first = _first_over_sequence(r[index + 1:], first)
+                new_s = dict.setdefault(follow, symb, set()) | (right_first - {EPSILON})
+                if EPSILON in right_first:
+                    new_s = new_s | dict.setdefault(follow, l, set())
+                something_changed = something_changed or new_s != follow[symb]
+                follow[symb] = new_s
+    # cosntruct the table
+    table = _LLTable()
+    for rule in grammar.rules:
+        r_first = _first_over_sequence(rule.right, first)
+        for can_be in r_first - {EPSILON}:
+            table.add(rule.fromSymbol, [can_be], rule)
+        if EPSILON in r_first:
+            for can_be in follow[rule.fromSymbol]:
+                table.add(rule.fromSymbol, [can_be], rule)
+    return table
