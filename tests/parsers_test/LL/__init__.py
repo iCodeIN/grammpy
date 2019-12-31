@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 """
 :Author Patrik Valkovic
-:Created 31.08.2017 09:48
+:Created 31.12.2019 10:51
 :Licence MIT
 Part of grammpy
 
 """
-
-from .CYK import cyk
-from .ll import ll

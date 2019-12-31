@@ -7,5 +7,10 @@ Part of grammpy
 
 """
 
-EPSILON = object()
+class _Epsilon:
+    def __str__(self) -> str:
+        return "EPS"
+
+
+EPSILON = _Epsilon()
 EPS = EPSILON

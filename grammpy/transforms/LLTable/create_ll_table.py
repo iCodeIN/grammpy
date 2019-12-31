@@ -88,7 +88,7 @@ def _first_over_sequence(sequence, first):
 def create_ll_table(grammar, distance=1):
     # type: (Grammar, int) -> _LLTable
     # TODO doc comment
-    # Compute first set
+    # compute first set
     first = dict()
     something_changed = True
     while something_changed:
@@ -127,7 +127,6 @@ def create_ll_table(grammar, distance=1):
         for rule in grammar.rules:
             l = rule.fromSymbol  # type: Type[Nonterminal]
             r = rule.right  # type: list
-            # part 1
             for symb, index in zip(r, range(len(r))):
                 if not Nonterminal.is_nonterminal(symb):
                     continue
@@ -137,7 +136,7 @@ def create_ll_table(grammar, distance=1):
                     new_s = new_s | dict.setdefault(follow, l, set())
                 something_changed = something_changed or new_s != follow[symb]
                 follow[symb] = new_s
-    # cosntruct the table
+    # construct the table
     table = _LLTable()
     for rule in grammar.rules:
         r_first = _first_over_sequence(rule.right, first)
