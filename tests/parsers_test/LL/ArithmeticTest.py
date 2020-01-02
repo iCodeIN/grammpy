@@ -14,6 +14,9 @@ from unittest import TestCase, main
 from grammpy import *
 from grammpy.transforms import ContextFree, Traversing
 from grammpy.parsers import ll, cyk
+
+from _support import build_tree as bt
+
 class E(Nonterminal): pass
 class E2(Nonterminal): pass
 class T(Nonterminal): pass
@@ -30,6 +33,58 @@ class R8(Rule): rule = ([F], ['(', E, ')'])
 
 
 class ArithmeticTest(TestCase):
+
+    def setUp(self) -> None:
+        self.g = Grammar(start_symbol=E,
+                    terminals=[0, '(', ')', '+', '*'],
+                    nonterminals=[E, E2, T, T2, F],
+                    rules=[R1, R2, R3, R4, R5, R6, R7, R8])
+        self.t = ContextFree.create_ll_table(self.g)
+
+    def check_tree(self, expected, value):
+        # type: (Nonterminal, Nonterminal) -> None
+        self.assertIsInstance(value, type(expected))
+        if isinstance(expected, Terminal) and expected.s is EPS:
+            self.assertIs(value.s, EPS)
+        if expected.to_rule is not None:
+            self.assertIsInstance(value.to_rule, type(expected.to_rule))
+            self.assertEqual(len(value.to_rule.to_symbols), len(expected.to_rule.to_symbols))
+            for ex, val in zip(expected.to_rule.to_symbols, value.to_rule.to_symbols):
+                self.assertIsInstance(val, type(ex))
+            self.assertIs(value.to_rule.from_symbols[0], value)
+            for val in value.to_rule.to_symbols:
+                self.assertIs(val.from_rule, value.to_rule)
+            for ex, val in zip(expected.to_rule.to_symbols, value.to_rule.to_symbols):
+                self.check_tree(ex, val)
+
+    def test_only_plus(self):
+        root = ll(self.g, self.t, [0, '+', 0])
+        test_tree = bt(E, R1, [
+            bt(T, R4, [
+                bt(F, R7, [
+                    bt(0)
+                ]),
+                bt(T2, R6, [
+                    bt(EPS)
+                ])
+            ]),
+            bt(E2, R2, [
+                bt('+'),
+                bt(T, R4, [
+                    bt(F, R7, [
+                        bt(0)
+                    ]),
+                    bt(T2, R6, [
+                        bt(EPS)
+                    ])
+                ]),
+                bt(E2, R3, [
+                    bt(EPS)
+                ])
+            ])
+        ])
+        self.check_tree(test_tree, root)
+
 
     def test_arithmetic_plus(self):
         g = Grammar(start_symbol=E,
